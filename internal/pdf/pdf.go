@@ -41,7 +41,7 @@ func GeneratePDF(cfg config.Config) error {
 				WithMarginBottom(0).
 				WithMarginLeft(0).
 				WithMarginRight(0).
-				WithScale(1.0).
+				WithScale(0.9).
 				Do(ctx)
 			return err
 		}),
