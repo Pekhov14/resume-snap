@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -11,11 +12,23 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+type Config struct {
+	URL      string `json:"url"`
+	Selector string `json:"selector"`
+	Output   string `json:"output"`
+}
+
 func main() {
+	// Загрузка конфигурации
+	config, err := loadConfig("config.json")
+	if err != nil {
+		log.Fatal("Ошибка загрузки конфигурации:", err)
+	}
+
 	// Параметры командной строки
-	url := flag.String("url", "", "URL страницы для обработки")
-	selector := flag.String("selector", "", "CSS селектор элемента для конвертации в PDF")
-	output := flag.String("output", "output.pdf", "Имя выходного PDF файла")
+	url := flag.String("url", config.URL, "URL страницы для обработки")
+	selector := flag.String("selector", config.Selector, "CSS селектор элемента для конвертации в PDF")
+	output := flag.String("output", config.Output, "Имя выходного PDF файла")
 	flag.Parse()
 
 	if *url == "" || *selector == "" {
@@ -31,7 +44,7 @@ func main() {
 	var pdfData []byte
 
 	// Запуск браузерных команд
-	err := chromedp.Run(ctx,
+	err = chromedp.Run(ctx,
 		// Переход на страницу
 		chromedp.Navigate(*url),
 
@@ -92,4 +105,18 @@ func main() {
 	}
 
 	fmt.Println("PDF успешно сохранен как", *output)
+}
+
+func loadConfig(filename string) (Config, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return Config{}, err
+	}
+	defer file.Close()
+
+	var config Config
+	if err := json.NewDecoder(file).Decode(&config); err != nil {
+		return Config{}, err
+	}
+	return config, nil
 }
