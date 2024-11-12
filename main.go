@@ -51,30 +51,11 @@ func main() {
 		// Ожидание видимости нужного элемента
 		chromedp.WaitVisible(*selector, chromedp.ByQuery),
 
-		// Получение размеров элемента (ширина, высота, и координаты)
-		chromedp.Evaluate(fmt.Sprintf(`
-			(function() {
-				const el = document.querySelector('%s');
-				const rect = el.getBoundingClientRect();
-				return { width: rect.width, height: rect.height, x: rect.left, y: rect.top };
-			})()
-		`, *selector), &struct{ Width, Height, X, Y float64 }{elementWidth, elementHeight, elementX, elementY}),
+		// Получение размеров элемента
+		chromedp.Evaluate(getElementDimensionsScript(*selector), &struct{ Width, Height, X, Y float64 }{elementWidth, elementHeight, elementX, elementY}),
 
 		// Убираем тень и скрываем все элементы, кроме выбранного
-		chromedp.Evaluate(fmt.Sprintf(`
-			(function() {
-				// Убираем тень (box-shadow) у выбранного элемента
-				const el = document.querySelector('%s');
-				el.style.boxShadow = 'none';
-				// Скрытие всех элементов на странице
-				document.body.style.visibility = 'hidden';
-				// Отображение только нужного элемента
-				el.style.visibility = 'visible';
-				// Прокрутка страницы к элементу
-				window.scrollTo(0, %f);
-				el.style.marginTop = '-100px';
-			})()
-		`, *selector, elementY), nil),
+		chromedp.Evaluate(hideElementsAndScrollScript(*selector), nil),
 
 		// Генерация PDF только для видимого контента
 		chromedp.ActionFunc(func(ctx context.Context) error {
@@ -119,4 +100,27 @@ func loadConfig(filename string) (Config, error) {
 		return Config{}, err
 	}
 	return config, nil
+}
+
+func getElementDimensionsScript(selector string) string {
+	return fmt.Sprintf(`
+		(function() {
+			const el = document.querySelector('%s');
+			const rect = el.getBoundingClientRect();
+			return { width: rect.width, height: rect.height, x: rect.left, y: rect.top };
+		})()
+	`, selector)
+}
+
+func hideElementsAndScrollScript(selector string) string {
+	return fmt.Sprintf(`
+		(function() {
+			const el = document.querySelector('%s');
+			el.style.boxShadow = 'none';
+			document.body.style.visibility = 'hidden';
+			el.style.visibility = 'visible';
+			window.scrollTo(0, el.getBoundingClientRect().top);
+			el.style.marginTop = '-100px';
+		})()
+	`, selector)
 }
