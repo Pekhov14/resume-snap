@@ -28,7 +28,7 @@ clean:
 	rm -rf myapp $(VENDOR_DIR)
 
 run-config:
-	go run main.go
+	go run cmd/main.go
 
 run-param:
-	go run --url=https://anton-pekhov.vercel.app/cv --selector="#cv-container" --output="cv_anton_pekhov_backend_developer.pdf"
+	go run cmd/main.go --url=https://anton-pekhov.vercel.app/cv --selector="#cv-container" --output="cv_anton_pekhov_backend_developer.pdf"
