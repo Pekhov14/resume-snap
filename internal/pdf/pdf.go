@@ -3,17 +3,18 @@ package pdf
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
+	"time"
 
 	"github.com/Pekhov14/resume-snap/internal/config"
-
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
 
-// Определение структуры для хранения размеров элемента
 type ElementDimensions struct {
-	Width, Height, X, Y float64
+	Width  float64 `json:"width"`
+	Height float64 `json:"height"`
 }
 
 func GeneratePDF(cfg config.Config) error {
@@ -21,37 +22,55 @@ func GeneratePDF(cfg config.Config) error {
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 
-	// Переменная для хранения размеров элемента
 	var dimensions ElementDimensions
 	var pdfData []byte
 
-	// Запуск браузерных команд
+	log.Printf("Start generating PDF for page: %s", cfg.URL)
+
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(cfg.URL),
 		chromedp.WaitVisible(cfg.Selector, chromedp.ByQuery),
+		chromedp.Evaluate(preparePageForPDF(cfg.Selector), nil),
 		chromedp.Evaluate(getElementDimensionsScript(cfg.Selector), &dimensions),
-		chromedp.Evaluate(hideElementsAndScrollScript(cfg.Selector), nil),
+
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			log.Printf("Element dimensions: %.2fpx x %.2fpx", dimensions.Width, dimensions.Height)
+			return nil
+		}),
+
+		chromedp.Sleep(1 * time.Second),
+
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			var err error
+			paperWidth  := dimensions.Width/96 + 0.5
+			paperHeight := 8.69 //11.69 is A4
+
+			log.Printf("PDF paper size: %.2f x %.2f inches", paperWidth, paperHeight)
+
 			pdfData, _, err = page.PrintToPDF().
 				WithPrintBackground(true).
-				WithPaperWidth(dimensions.Width / 96).
-				WithPaperHeight(dimensions.Height / 96).
+				WithPaperWidth(paperWidth).
+				WithPaperHeight(paperHeight).
 				WithMarginTop(0).
 				WithMarginBottom(0).
 				WithMarginLeft(0).
 				WithMarginRight(0).
-				WithScale(0.9).
+				WithScale(.8).
 				Do(ctx)
 			return err
 		}),
 	)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating PDF: %w", err)
 	}
 
-	return os.WriteFile(cfg.Output, pdfData, 0644)
+	if err := os.WriteFile(cfg.Output, pdfData, 0644); err != nil {
+		return fmt.Errorf("error writing file: %w", err)
+	}
+
+	log.Printf("PDF successfully saved: %s", cfg.Output)
+	return nil
 }
 
 func getElementDimensionsScript(selector string) string {
@@ -64,7 +83,7 @@ func getElementDimensionsScript(selector string) string {
 	`, selector)
 }
 
-func hideElementsAndScrollScript(selector string) string {
+func preparePageForPDF(selector string) string {
 	return fmt.Sprintf(`
 		(function() {
 			const el = document.querySelector('%s');

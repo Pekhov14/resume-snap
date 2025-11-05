@@ -10,13 +10,11 @@ import (
 func main() {
 	cfg, err := config.LoadConfig("config.json")
 	if err != nil {
-		log.Fatal("Ошибка загрузки конфигурации:", err)
+		log.Fatal("Error loading config:", err)
 	}
 
 	err = pdf.GeneratePDF(cfg)
 	if err != nil {
-		log.Fatal("Ошибка при создании PDF:", err)
+		log.Fatal("Error with creating pdf:", err)
 	}
-
-	log.Println("PDF успешно сохранен")
 }

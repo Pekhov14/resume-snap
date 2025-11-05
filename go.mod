@@ -1,6 +1,6 @@
 module github.com/Pekhov14/resume-snap
 
-go 1.23.2
+go 1.25.3
 
 require (
 	github.com/chromedp/cdproto v0.0.0-20241110205750-a72e6703cd9b

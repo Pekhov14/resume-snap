@@ -12,7 +12,7 @@ all: build
 
 # Сборка проекта
 build:
-	$(GO) build -o resume .
+	$(GO) build -o resume cmd/main.go
 
 # Удаление неиспользуемых зависимостей и создание папки vendor
 tidy:
@@ -27,8 +27,9 @@ vendor:
 clean:
 	rm -rf myapp $(VENDOR_DIR)
 
-run-config:
-	go run cmd/main.go
+run:
+	go run cmd/main.go --url=http://localhost:3000/cv --selector="#cv-container" --output="cv_anton_pekhov_backend_developer.pdf" --HeightAdjustment=-300 --scale=0.8
 
-run-param:
-	go run cmd/main.go --url=https://anton-pekhov.vercel.app/cv --selector="#cv-container" --output="cv_anton_pekhov_backend_developer.pdf"
+
+run-config:
+	go run cmd/main.go --url=http://localhost:3000/cv --selector="#cv-container" --output="cv_anton_pekhov_backend_developer.pdf"

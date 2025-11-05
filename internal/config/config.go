@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	URL      string `json:"url"`
-	Selector string `json:"selector"`
-	Output   string `json:"output"`
+	URL      string  `json:"url"`
+	Selector string  `json:"selector"`
+	Output   string  `json:"output"`
 }
 
 func LoadConfig(filename string) (Config, error) {
