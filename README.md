@@ -36,5 +36,3 @@ Resume Snap is a powerful Go application that automatically converts your online
 ### Prerequisites
 - Go 1.25 or later
 - Google Chrome or Chromium browser
-
-TODO:
