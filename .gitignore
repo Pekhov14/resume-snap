@@ -1,1 +1,5 @@
 vendor/
+.idea/
+resume
+config.json
+.DS_Store

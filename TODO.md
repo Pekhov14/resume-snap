@@ -1,0 +1,3 @@
+TODO:
+-[x] Creating pdf file from cv web site link.
+-[ ] Send to storage via http, ...

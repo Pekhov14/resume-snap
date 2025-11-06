@@ -26,5 +26,6 @@ clean:
 run:
 	go run cmd/main.go
 
+# todo
 run-config:
 	go run cmd/main.go --url=http://localhost:3000/cv --selector="#cv-container" --output="cv_anton_pekhov_backend_developer.pdf"

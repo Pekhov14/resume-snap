@@ -1,5 +1,5 @@
 {
-    "url": "http://localhost:3000/cv",
+    "url": "https://anton-pekhov.vercel.app/cv",
     "selector": "#cv-container",
     "output": "cv_anton_pekhov_backend_developer.pdf"
   }
